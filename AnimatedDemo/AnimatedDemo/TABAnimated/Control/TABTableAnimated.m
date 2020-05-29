@@ -13,7 +13,7 @@
 #import "UIView+TABControlAnimation.h"
 #import <objc/runtime.h>
 
-@interface TABTableAnimated()
+@interface TABTableAnimated()<UITableViewDelegate, UITableViewDataSource>
 
 @property (nonatomic, strong, readwrite) NSMutableArray <NSNumber *> *headerHeightArray;
 @property (nonatomic, strong, readwrite) NSMutableArray <NSNumber *> *footerHeightArray;
@@ -220,6 +220,12 @@
     
     UITableView *tableView = (UITableView *)controlView;
     
+    self.oldDataSource = tableView.dataSource;
+    self.oldDelegate = tableView.delegate;
+    
+    tableView.delegate = self;
+    tableView.dataSource = self;
+    
     if (tableView.estimatedRowHeight != 0) {
         self.oldEstimatedRowHeight = tableView.estimatedRowHeight;
         tableView.estimatedRowHeight = UITableViewAutomaticDimension;
@@ -253,22 +259,6 @@
         [tableView reloadSections:[NSIndexSet indexSetWithIndex:index] withRowAnimation:UITableViewRowAnimationNone];
     }else if (self.runMode == TABAnimatedRunByRow) {
         [tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:index inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
-    }
-}
-
-- (void)exchangeDelegate:(UIView *)target {
-    if (!self.isExhangeDelegateIMP) {
-        id <UITableViewDelegate> delegate = ((UITableView *)target).delegate;
-        [self exchangeDelegateMethods:delegate target:target];
-        self.isExhangeDelegateIMP = YES;
-    }
-}
-
-- (void)exchangeDataSource:(UIView *)target {
-    if (!self.isExhangeDataSourceIMP) {
-        id <UITableViewDataSource> dataSource = ((UITableView *)target).dataSource;
-        [self exchangeDataSourceMethods:dataSource target:target];
-        self.isExhangeDataSourceIMP = YES;
     }
 }
 
@@ -310,126 +300,21 @@
     }
 }
 
-#pragma mark - Private Methods
-
-- (void)exchangeDelegateMethods:(id<UITableViewDelegate>)delegate target:(id)target {
-    
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wundeclared-selector"
-    SEL oldClickDelegate = @selector(tableView:didSelectRowAtIndexPath:);
-    SEL newClickDelegate = @selector(tab_tableView:didSelectRowAtIndexPath:);
-    [self exchangeDelegateOldSel:oldClickDelegate
-                          newSel:newClickDelegate
-                          target:target
-                        delegate:delegate];
-    
-    SEL oldHeightDelegate = @selector(tableView:heightForRowAtIndexPath:);
-    SEL newHeightDelegate = @selector(tab_tableView:heightForRowAtIndexPath:);
-    
-    SEL estimatedHeightDelegateSel = @selector(tableView:estimatedHeightForRowAtIndexPath:);
-    
-    if ([delegate respondsToSelector:estimatedHeightDelegateSel] &&
-        ![delegate respondsToSelector:oldHeightDelegate]) {
-        EstimatedTableViewDelegate *edelegate = EstimatedTableViewDelegate.new;
-        Method method = class_getInstanceMethod([edelegate class], oldHeightDelegate);
-        BOOL isVictory = class_addMethod([delegate class], oldHeightDelegate, class_getMethodImplementation([edelegate class], oldHeightDelegate), method_getTypeEncoding(method));
-        if (isVictory) {
-            [self exchangeDelegateOldSel:oldHeightDelegate
-                                  newSel:newHeightDelegate
-                                  target:target
-                                delegate:delegate];
-        }
-        ((UITableView *)target).delegate = delegate;
-    }else {
-        [self exchangeDelegateOldSel:oldHeightDelegate
-                              newSel:newHeightDelegate
-                              target:target
-                            delegate:delegate];
-    }
-    
-    SEL oldHeadViewDelegate = @selector(tableView:viewForHeaderInSection:);
-    SEL newHeadViewDelegate= @selector(tab_tableView:viewForHeaderInSection:);
-    [self exchangeDelegateOldSel:oldHeadViewDelegate
-                          newSel:newHeadViewDelegate
-                          target:target
-                        delegate:delegate];
-    
-    SEL oldFooterViewDelegate = @selector(tableView:viewForFooterInSection:);
-    SEL newFooterViewDelegate = @selector(tab_tableView:viewForFooterInSection:);
-    [self exchangeDelegateOldSel:oldFooterViewDelegate
-                          newSel:newFooterViewDelegate
-                          target:target
-                        delegate:delegate];
-    
-    SEL oldHeadHeightDelegate = @selector(tableView:heightForHeaderInSection:);
-    SEL newHeadHeightDelegate = @selector(tab_tableView:heightForHeaderInSection:);
-    [self exchangeDelegateOldSel:oldHeadHeightDelegate
-                          newSel:newHeadHeightDelegate
-                          target:target
-                        delegate:delegate];
-    
-    SEL oldFooterHeightDelegate = @selector(tableView:heightForFooterInSection:);
-    SEL newFooterHeightDelegate = @selector(tab_tableView:heightForFooterInSection:);
-    [self exchangeDelegateOldSel:oldFooterHeightDelegate
-                          newSel:newFooterHeightDelegate
-                          target:target
-                        delegate:delegate];
-#pragma clang diagnostic pop
-}
-
-- (void)exchangeDataSourceMethods:(id<UITableViewDataSource>)dataSource
-                           target:(id)target {
-    
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wundeclared-selector"
-    SEL oldSectionSelector = @selector(numberOfSectionsInTableView:);
-    SEL newSectionSelector = @selector(tab_numberOfSectionsInTableView:);
-    
-    SEL oldSelector = @selector(tableView:numberOfRowsInSection:);
-    SEL newSelector = @selector(tab_tableView:numberOfRowsInSection:);
-    
-    SEL oldCell = @selector(tableView:cellForRowAtIndexPath:);
-    SEL newCell = @selector(tab_tableView:cellForRowAtIndexPath:);
-    
-    SEL old = @selector(tableView:willDisplayCell:forRowAtIndexPath:);
-    SEL new = @selector(tab_tableView:willDisplayCell:forRowAtIndexPath:);
-#pragma clang diagnostic pop
-    
-    [self exchangeDelegateOldSel:oldSectionSelector
-                          newSel:newSectionSelector
-                          target:target
-                        delegate:dataSource];
-    
-    [self exchangeDelegateOldSel:oldSelector
-                          newSel:newSelector
-                          target:target
-                        delegate:dataSource];
-    
-    [self exchangeDelegateOldSel:oldCell
-                          newSel:newCell
-                          target:target
-                        delegate:dataSource];
-    
-    [self exchangeDelegateOldSel:old
-                          newSel:new
-                          target:target
-                        delegate:dataSource];
-}
-
 #pragma mark - TABTableViewDataSource / Delegate
 
-- (NSInteger)tab_numberOfSectionsInTableView:(UITableView *)tableView {
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
     
     TABTableAnimated *tabAnimated = tableView.tabAnimated;
     if (tabAnimated.state != TABViewAnimationStart) {
-        return [self tab_numberOfSectionsInTableView:tableView];
+        [tabAnimated.oldDataSource performSelector:@selector(numbr) withObject:<#(id)#>]
+        return [tabAnimated.oldDataSource numberOfSectionsInTableView:tableView];
     }
     
     if (tabAnimated.animatedSectionCount > 0) {
         return tabAnimated.animatedSectionCount;
     }
     
-    NSInteger count = [self tab_numberOfSectionsInTableView:tableView];
+    NSInteger count = [tabAnimated.oldDataSource numberOfSectionsInTableView:tableView];
     if (count == 0) {
         count = tabAnimated.cellClassArray.count;
     }
@@ -437,11 +322,11 @@
     return count;
 }
 
-- (NSInteger)tab_tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     
     TABTableAnimated *tabAnimated = tableView.tabAnimated;
     if (tabAnimated.state != TABViewAnimationStart || tabAnimated.runMode == TABAnimatedRunByRow) {
-        return [self tab_tableView:tableView numberOfRowsInSection:section];
+        return [tabAnimated.oldDataSource tableView:tableView numberOfRowsInSection:section];
     }
     
     if (tabAnimated.animatedCount > 0) {
@@ -450,35 +335,35 @@
     
     NSInteger index = [tabAnimated getIndexWithIndex:section];
     if (index < 0) {
-        return [self tab_tableView:tableView numberOfRowsInSection:section];
+        return [tabAnimated.oldDataSource tableView:tableView numberOfRowsInSection:section];
     }
     return [tabAnimated.cellCountArray[index] integerValue];
 }
 
-- (CGFloat)tab_tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    
-    if (tableView.tabAnimated.state != TABViewAnimationStart) {
-        return [self tab_tableView:tableView heightForRowAtIndexPath:indexPath];
-    }
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
     
     TABTableAnimated *tabAnimated = tableView.tabAnimated;
+    if (tabAnimated.state != TABViewAnimationStart) {
+        return [tabAnimated.oldDelegate tableView:tableView heightForRowAtIndexPath:indexPath];
+    }
+    
     NSInteger index = [tabAnimated getIndexWithIndexPath:indexPath];
     if (index < 0) {
-        return [self tab_tableView:tableView heightForRowAtIndexPath:indexPath];
+        return [tabAnimated.oldDelegate tableView:tableView heightForRowAtIndexPath:indexPath];
     }
     return [tabAnimated.cellHeightArray[index] floatValue];
 }
 
-- (UITableViewCell *)tab_tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    
-    if (tableView.tabAnimated.state != TABViewAnimationStart) {
-        return [self tab_tableView:tableView cellForRowAtIndexPath:indexPath];
-    }
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
     TABTableAnimated *tabAnimated = tableView.tabAnimated;
+    if (tabAnimated.state != TABViewAnimationStart) {
+        return [tabAnimated.oldDataSource tableView:tableView cellForRowAtIndexPath:indexPath];
+    }
+    
     NSInteger index = [tabAnimated getIndexWithIndexPath:indexPath];
     if (index < 0) {
-        return [self tab_tableView:tableView cellForRowAtIndexPath:indexPath];
+        return [tabAnimated.oldDataSource tableView:tableView cellForRowAtIndexPath:indexPath];
     }
     
     Class currentClass = tabAnimated.cellClassArray[index];
@@ -487,61 +372,61 @@
     return cell;
 }
 
-- (void)tab_tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
+- (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
     if (tableView.tabAnimated.state != TABViewAnimationStart) {
-        [self tab_tableView:tableView willDisplayCell:cell forRowAtIndexPath:indexPath];
+        [tableView.tabAnimated.oldDelegate tableView:tableView willDisplayCell:cell forRowAtIndexPath:indexPath];
     }
 }
 
-- (void)tab_tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     if (tableView.tabAnimated.state != TABViewAnimationStart) {
-        [self tab_tableView:tableView didSelectRowAtIndexPath:indexPath];
+        [tableView.tabAnimated.oldDelegate tableView:tableView didSelectRowAtIndexPath:indexPath];
     }
 }
 
 #pragma mark - HeaderFooterView
 
-- (CGFloat)tab_tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
-    
-    if (tableView.tabAnimated.state != TABViewAnimationStart) {
-        return [self tab_tableView:tableView heightForHeaderInSection:section];
-    }
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
     
     TABTableAnimated *tabAnimated = tableView.tabAnimated;
+    if (tabAnimated.state != TABViewAnimationStart) {
+        return [tabAnimated.oldDelegate tableView:tableView heightForHeaderInSection:section];
+    }
+    
     NSInteger index = [tabAnimated getHeaderIndexWithIndex:section];
     if (index < 0) {
-        return [self tab_tableView:tableView heightForHeaderInSection:section];
+        return [tabAnimated.oldDelegate tableView:tableView heightForHeaderInSection:section];
     }
     return [tableView.tabAnimated.headerHeightArray[index] floatValue];
 }
 
-- (CGFloat)tab_tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section {
-    
-    if (tableView.tabAnimated.state != TABViewAnimationStart) {
-        return [self tab_tableView:tableView heightForFooterInSection:section];
-    }
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section {
     
     TABTableAnimated *tabAnimated = tableView.tabAnimated;
+    if (tabAnimated.state != TABViewAnimationStart) {
+        return [tabAnimated.oldDelegate tableView:tableView heightForFooterInSection:section];
+    }
+    
     NSInteger index = [tabAnimated getFooterIndexWithIndex:section];
     if (index < 0) {
-        return [self tab_tableView:tableView heightForFooterInSection:section];
+        return [tabAnimated.oldDelegate tableView:tableView heightForFooterInSection:section];
     }
     return [tableView.tabAnimated.footerHeightArray[index] floatValue];
 }
 
-- (nullable UIView *)tab_tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
-    
-    if (tableView.tabAnimated.state != TABViewAnimationStart) {
-        return [self tab_tableView:tableView viewForHeaderInSection:section];
-    }
+- (nullable UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
     
     TABTableAnimated *tabAnimated = tableView.tabAnimated;
+    if (tabAnimated.state != TABViewAnimationStart) {
+        return [tabAnimated.oldDelegate tableView:tableView viewForHeaderInSection:section];
+    }
+
     NSInteger index = [tabAnimated getHeaderIndexWithIndex:section];
     if (index < 0) {
-        return [self tab_tableView:tableView viewForHeaderInSection:section];
+        return [tabAnimated.oldDelegate tableView:tableView viewForHeaderInSection:section];
     }
     
-    Class class = tableView.tabAnimated.headerClassArray[index];
+    Class class = tabAnimated.headerClassArray[index];
     
     UIView *hfView;
     // 启动加工层
@@ -551,19 +436,19 @@
     return hfView;
 }
 
-- (nullable UIView *)tab_tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section {
-    
-    if (tableView.tabAnimated.state != TABViewAnimationStart) {
-        return [self tab_tableView:tableView viewForFooterInSection:section];
-    }
+- (nullable UIView *)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section {
     
     TABTableAnimated *tabAnimated = tableView.tabAnimated;
-    NSInteger index = [tabAnimated getFooterIndexWithIndex:section];
-    if (index < 0) {
-        return [self tab_tableView:tableView viewForFooterInSection:section];
+    if (tabAnimated.state != TABViewAnimationStart) {
+        return [tabAnimated.oldDelegate tableView:tableView viewForFooterInSection:section];
     }
     
-    Class class = tableView.tabAnimated.footerClassArray[index];
+    NSInteger index = [tabAnimated getFooterIndexWithIndex:section];
+    if (index < 0) {
+        return [tabAnimated.oldDelegate tableView:tableView viewForFooterInSection:section];
+    }
+    
+    Class class = tabAnimated.footerClassArray[index];
     
     UIView *hfView;
     // 启动加工层

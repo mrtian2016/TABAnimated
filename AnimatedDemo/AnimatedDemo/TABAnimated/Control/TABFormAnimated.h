@@ -72,6 +72,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) BOOL scrollEnabled;
 @property (nonatomic, assign) BOOL oldScrollEnabled;
 
+@property (nonatomic, weak) id oldDelegate;
+@property (nonatomic, weak) id oldDataSource;
+
 - (NSInteger)getIndexWithIndex:(NSInteger)index;
 - (NSInteger)getIndexWithIndexPath:(NSIndexPath *)indexPath;
 - (NSString *)getStringWIthIndex:(NSInteger)index;

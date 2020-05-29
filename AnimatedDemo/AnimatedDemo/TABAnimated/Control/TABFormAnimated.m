@@ -51,8 +51,8 @@
     if (isFirstLoad) {
         if (self.runIndexDict.count == 0) return NO;
         [self registerViewToReuse:controlView];
-        [self exchangeDelegate:controlView];
-        [self exchangeDataSource:controlView];
+//        [self exchangeDelegate:controlView];
+//        [self exchangeDataSource:controlView];
     }else if (index == TABAnimatedIndexTag) {
         [self reloadAnimation];
     }else if (![self reloadAnimationWithIndex:index]) {

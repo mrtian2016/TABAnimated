@@ -153,6 +153,9 @@ const int TABAnimatedIndexTag = -100000;
             if (isNeedReset) {
                 [tabAnimated endAnimation];
                 UITableView *tableView = (UITableView *)self;
+                tableView.delegate = tabAnimated.oldDelegate;
+                tableView.dataSource = tabAnimated.oldDataSource;
+                
                 if (((TABTableAnimated *)tabAnimated).oldEstimatedRowHeight > 0) {
                     tableView.estimatedRowHeight = ((TABTableAnimated *)tabAnimated).oldEstimatedRowHeight;
                     tableView.rowHeight = UITableViewAutomaticDimension;
