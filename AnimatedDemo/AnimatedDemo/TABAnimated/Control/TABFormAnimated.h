@@ -59,6 +59,9 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign) BOOL isExhangeDataSourceIMP;
 
+@property (nonatomic, weak) id oldDelegate;
+@property (nonatomic, weak) id oldDataSource;
+
 @property (nonatomic, assign, readonly) NSInteger runningCount;
 
 /**

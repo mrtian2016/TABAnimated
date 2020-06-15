@@ -11,6 +11,8 @@
 #import "MainViewController.h"
 #import "TABAnimated.h"
 
+#import "TABProtocolRouteManager.h"
+
 @interface AppDelegate ()
 
 @end
@@ -21,6 +23,8 @@
     // Override point for customization after application launch.
     
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+    
+    [[TABProtocolRouteManager shareInstance] setRouteType:TABProtocolRouteSwitchDelegate];
     
     // Init `TABAnimated`, and set the properties you need.
     // 初始化TABAnimated，并设置TABAnimated相关属性

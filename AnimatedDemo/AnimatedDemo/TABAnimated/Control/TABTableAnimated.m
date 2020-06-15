@@ -12,6 +12,7 @@
 #import "UIView+TABControlModel.h"
 #import "UIView+TABControlAnimation.h"
 #import <objc/runtime.h>
+#import "NSObject+TABPerformSelector.h"
 
 @interface TABTableAnimated()
 

@@ -40,7 +40,7 @@
  */
 typedef NS_ENUM(NSInteger, TABAnimationType) {
     
-    // 骨架层
+    // 骨架层 + 经典动画
     TABAnimationTypeOnlySkeleton = 0,
     
     // 骨架层 + 呼吸灯动画
@@ -182,13 +182,13 @@ typedef NS_ENUM(NSInteger, TABAnimationType) {
 + (TABAnimated *)sharedAnimated;
 
 /**
- * 初始化并选择动画类型
+ * 初始化并选择全局动画类型
  * @param animationType 全局动画类型
  */
 - (instancetype)initWithAnimatonType:(TABAnimationType)animationType;
 
 /**
- * 骨架层
+ * 骨架层 + 经典动画
  */
 - (void)initWithOnlySkeleton;
 
