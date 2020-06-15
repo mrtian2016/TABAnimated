@@ -19,6 +19,10 @@
 
 #import "TABAnimatedProduction.h"
 
+#import "TABAnimatedPullLoadingComponent.h"
+
+#import "TABProtocolRouteManager.h"
+
 static const NSTimeInterval kDelayReloadDataTime = .4;
 const int TABAnimatedIndexTag = -100000;
 
@@ -145,12 +149,13 @@ const int TABAnimatedIndexTag = -100000;
     if ([self.tabAnimated isKindOfClass:[TABFormAnimated class]]) {
         
         TABFormAnimated *tabAnimated = (TABFormAnimated *)self.tabAnimated;
-        
         UIScrollView *scrollView = (UIScrollView *)self;
         scrollView.scrollEnabled = tabAnimated.oldScrollEnabled;
         
         if ([self isKindOfClass:[UITableView class]]) {
+            
             if (isNeedReset) {
+                [[TABProtocolRouteManager shareInstance] stopRouteWithView:self];
                 [tabAnimated endAnimation];
                 UITableView *tableView = (UITableView *)self;
                 tableView.delegate = tabAnimated.oldDelegate;
@@ -171,11 +176,16 @@ const int TABAnimatedIndexTag = -100000;
                 if (![tabAnimated endAnimationWithIndex:index]) {
                     return;
                 }
-                if (tabAnimated.runMode == TABAnimatedRunBySection) {
-                    [(UITableView *)self reloadSections:[NSIndexSet indexSetWithIndex:index] withRowAnimation:UITableViewRowAnimationNone];
-                }else {
-                    [(UITableView *)self reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:index inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
-                }
+//                if (tabAnimated.runningCount == 0) {
+                    [[TABProtocolRouteManager shareInstance] stopRouteWithView:self];
+//                }
+                
+                [(UITableView *)self reloadData];
+//                if (tabAnimated.runMode == TABAnimatedRunBySection) {
+//                    [(UITableView *)self reloadSections:[NSIndexSet indexSetWithIndex:index] withRowAnimation:UITableViewRowAnimationNone];
+//                }else {
+//                    [(UITableView *)self reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:index inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
+//                }
             }
         }else if ([self isKindOfClass:[UICollectionView class]]) {
             if (isNeedReset) {

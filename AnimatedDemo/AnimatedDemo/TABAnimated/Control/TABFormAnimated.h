@@ -7,6 +7,7 @@
 //
 
 #import "TABViewAnimated.h"
+#import "TABAnimatedPullLoadingComponent.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -58,6 +59,9 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign) BOOL isExhangeDataSourceIMP;
 
+@property (nonatomic, weak) id oldDelegate;
+@property (nonatomic, weak) id oldDataSource;
+
 @property (nonatomic, assign, readonly) NSInteger runningCount;
 
 /**
@@ -72,8 +76,17 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) BOOL scrollEnabled;
 @property (nonatomic, assign) BOOL oldScrollEnabled;
 
+<<<<<<< HEAD
 @property (nonatomic, weak) id oldDelegate;
 @property (nonatomic, weak) id oldDataSource;
+=======
+/**
+ 上拉加载更多组件
+ */
+@property (nonatomic, strong) TABAnimatedPullLoadingComponent *fullLoadingComponent;
+
+#pragma mark -
+>>>>>>> master
 
 - (NSInteger)getIndexWithIndex:(NSInteger)index;
 - (NSInteger)getIndexWithIndexPath:(NSIndexPath *)indexPath;

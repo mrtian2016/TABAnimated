@@ -12,6 +12,7 @@
 #import "UIView+TABControlModel.h"
 #import "UIView+TABControlAnimation.h"
 #import <objc/runtime.h>
+#import "NSObject+TABPerformSelector.h"
 
 @interface TABTableAnimated()<UITableViewDelegate, UITableViewDataSource>
 
@@ -128,7 +129,7 @@
     obj.cellHeightArray = @[@(cellHeight)];
     obj.cellCountArray = @[@(animatedCount)];
     obj.cellIndexArray = @[@(0)];
-    [obj.runIndexDict setValue:@(0) forKey:[NSString stringWithFormat:@"%ld",toIndex]];
+    [obj.runIndexDict setValue:@(0) forKey:[NSString stringWithFormat:@"%ld",(long)toIndex]];
     return obj;
 }
 
@@ -147,7 +148,7 @@
         for (NSInteger i = 0; i < cellClassArray.count; i++) {
             NSInteger index = i;
             NSInteger value = i;
-            [obj.runIndexDict setValue:@(value) forKey:[NSString stringWithFormat:@"%ld",index]];
+            [obj.runIndexDict setValue:@(value) forKey:[NSString stringWithFormat:@"%ld",(long)index]];
             [newIndexArray addObject:@(index)];
         }
         obj.cellIndexArray = newIndexArray.copy;
@@ -156,7 +157,7 @@
         for (NSInteger i = 0; i < indexArray.count; i++) {
             NSInteger index = [indexArray[i] integerValue];
             NSInteger value = i;
-            [obj.runIndexDict setValue:@(value) forKey:[NSString stringWithFormat:@"%ld",index]];
+            [obj.runIndexDict setValue:@(value) forKey:[NSString stringWithFormat:@"%ld",(long)index]];
         }
     }
     
@@ -305,11 +306,16 @@
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
     
     TABTableAnimated *tabAnimated = tableView.tabAnimated;
+<<<<<<< HEAD
     if (tabAnimated.state != TABViewAnimationStart) {
         [tabAnimated.oldDataSource performSelector:@selector(numbr) withObject:<#(id)#>]
         return [tabAnimated.oldDataSource numberOfSectionsInTableView:tableView];
+=======
+    if (tableView.tabAnimated.state != TABViewAnimationStart) {
+        return [self tab_numberOfSectionsInTableView:tableView];
+>>>>>>> master
     }
-    
+
     if (tabAnimated.animatedSectionCount > 0) {
         return tabAnimated.animatedSectionCount;
     }
@@ -325,8 +331,13 @@
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     
     TABTableAnimated *tabAnimated = tableView.tabAnimated;
+<<<<<<< HEAD
     if (tabAnimated.state != TABViewAnimationStart || tabAnimated.runMode == TABAnimatedRunByRow) {
         return [tabAnimated.oldDataSource tableView:tableView numberOfRowsInSection:section];
+=======
+    if (tableView.tabAnimated.state != TABViewAnimationStart || tabAnimated.runMode == TABAnimatedRunByRow) {
+        return [self tab_tableView:tableView numberOfRowsInSection:section];
+>>>>>>> master
     }
     
     if (tabAnimated.animatedCount > 0) {

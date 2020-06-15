@@ -11,6 +11,8 @@
 #import "TABAnimated.h"
 #import <objc/runtime.h>
 
+#import "TABProtocolRouteManager.h"
+
 @interface TABFormAnimated()
 
 @property (nonatomic, assign, readwrite) NSInteger runningCount;
@@ -53,6 +55,11 @@
         [self registerViewToReuse:controlView];
 //        [self exchangeDelegate:controlView];
 //        [self exchangeDataSource:controlView];
+<<<<<<< HEAD
+=======
+        [[TABProtocolRouteManager shareInstance] startRouteWithView:controlView];
+        
+>>>>>>> master
     }else if (index == TABAnimatedIndexTag) {
         [self reloadAnimation];
     }else if (![self reloadAnimationWithIndex:index]) {
@@ -75,8 +82,8 @@
 
 - (void)startAnimationWithIndex:(NSInteger)index isFirstLoad:(BOOL)isFirstLoad controlView:(UIView *)controlView {
     if ([self prepareDataWithIndex:index isFirstLoad:isFirstLoad controlView:controlView]) {
-        [self refreshWithIndex:index controlView:controlView];
-        [self updateLoadCount];
+//        [self refreshWithIndex:index controlView:controlView];
+//        [self updateLoadCount];
     }
 }
 
@@ -146,6 +153,7 @@
 }
 
 - (NSInteger)getIndexWithIndex:(NSInteger)index dict:(NSMutableDictionary *)dict {
+    if (index < 0 || index > 10000) return -1;
     NSString *key = [self _getStringWIthIndex:index];
     if (![[dict allKeys] containsObject:key]) return -1;
     return [[dict objectForKey:key] integerValue];
@@ -202,7 +210,7 @@
 }
 
 - (NSString *)_getStringWIthIndex:(NSInteger)index {
-    return [NSString stringWithFormat:@"%ld",index];
+    return [NSString stringWithFormat:@"%ld",(long)index];
 }
 
 #pragma mark -

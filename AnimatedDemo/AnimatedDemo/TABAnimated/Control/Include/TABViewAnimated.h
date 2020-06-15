@@ -133,6 +133,7 @@ extern int const TABAnimatedIndexTag;
  * 控制视图所处的控制器类型
  */
 @property (nonatomic, copy) NSString *targetControllerClassName;
+@property (nonatomic, strong) Class exchangeClas;
 
 /**
  * 哨兵视图，用于监听暗黑模式

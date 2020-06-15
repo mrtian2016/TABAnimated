@@ -11,6 +11,8 @@
 #import "MainViewController.h"
 #import "TABAnimated.h"
 
+#import "TABProtocolRouteManager.h"
+
 @interface AppDelegate ()
 
 @end
@@ -21,6 +23,8 @@
     // Override point for customization after application launch.
     
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+    
+    [[TABProtocolRouteManager shareInstance] setRouteType:TABProtocolRouteSwitchDelegate];
     
     // Init `TABAnimated`, and set the properties you need.
     // 初始化TABAnimated，并设置TABAnimated相关属性
@@ -44,7 +48,7 @@
     // release 环境下，默认开启缓存功能
     // 如果你想在 debug 环境下测试缓存功能，可以手动置为NO，但是预处理回调只生效一次！！！！
     // 如果你始终都不想使用缓存功能，可以手动置为YES
-    // 请仔细阅读：https://juejin.im/post/5d86d16ce51d4561fa2ec135
+    // 请仔细阅读：https://www.jianshu.com/p/7eeef75377df
 //    [TABAnimated sharedAnimated].closeCache = NO;
 
     MainViewController *vc = [[MainViewController alloc] init];
